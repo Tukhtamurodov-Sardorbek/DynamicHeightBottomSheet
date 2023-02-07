@@ -39,6 +39,9 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: widget.children.length, vsync: this);
+    context.read<DynamicBottomSheetProvider>().initializeChildrenSizes(widget.children.length);
+
     _animationController = AnimationController(vsync: this);
     _animationController.addListener(() {
       if(_tweenAnimation == null) return;
@@ -52,27 +55,28 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
         );
       }
     });
-    _tabController = TabController(length: widget.children.length, vsync: this);
-    _pageController = widget.pageController ?? PageController();
 
-    context.read<DynamicBottomSheetProvider>().initializeChildrenSizes(widget.children.length);
+    Future.delayed(const Duration(seconds: 0)).then((value) {
+      final screenHeight = context.read<DynamicBottomSheetProvider>().screenHeight;
+      final headerHeight = context.read<DynamicBottomSheetProvider>().headerHeight;
+      final position = data.initialPosition ?? const SnappingPosition.pixels(positionPixels: 0.0);
+
+      context.read<DynamicBottomSheetProvider>().currentPosition = position.getPositionInPixels(
+        screenHeight,
+        headerHeight,
+      );
+    });
+
+    _pageController = widget.pageController ?? PageController();
     context.read<DynamicBottomSheetProvider>().initializeCurrentPageIndex(_pageController.initialPage.clamp(0, widget.children.length - 1));
     context.read<DynamicBottomSheetProvider>().initializePreviousPageIndex();
+
     _shouldDisposePageController = widget.pageController == null;
 
     _pageController.addListener(() {
       context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
     });
 
-    Future.delayed(const Duration(seconds: 0)).then((value) {
-      final screenHeight = context.read<DynamicBottomSheetProvider>().screenHeight;
-      final headerHeight = context.read<DynamicBottomSheetProvider>().headerHeight;
-      final position = data.initialPosition ?? const SnappingPosition.pixels(positionPixels: 0.0);
-      context.read<DynamicBottomSheetProvider>().currentPosition = position.getPositionInPixels(
-        screenHeight,
-        headerHeight,
-      );
-    });
   }
 
   @override
@@ -117,13 +121,13 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
             Positioned(
               left: 0,
               right: 0,
-              top: boxConstraints.maxHeight - context.read<DynamicBottomSheetProvider>().currentPosition,
+              top: context.read<DynamicBottomSheetProvider>().screenHeight - context.read<DynamicBottomSheetProvider>().currentPosition,
               child: ColoredBox(
                 color: Colors.tealAccent,
                 child: TweenAnimationBuilder<double>(
                   curve: Curves.easeInOutCubic,
                   duration: const Duration(milliseconds: 200),
-                  tween: Tween<double>(begin: context.read<DynamicBottomSheetProvider>().previousSize, end: context.read<DynamicBottomSheetProvider>().currentSize),
+                  tween: Tween<double>(begin: context.read<DynamicBottomSheetProvider>().previousSize, end: context.watch<DynamicBottomSheetProvider>().currentSize),
                   child: PageView(
                     controller: _pageController,
                     physics: const ClampingScrollPhysics(),
@@ -131,8 +135,8 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
                       Future.delayed(
                           const Duration(milliseconds: 30),
                           (){
-                            final currentIndex = context.read<DynamicBottomSheetProvider>().currentPageIndex;
-                            final position = context.read<DynamicBottomSheetProvider>().maxSnapPosition;
+                            final currentIndex = Provider.of<DynamicBottomSheetProvider>(context, listen: false).currentPageIndex;
+                            final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).maxSnapPosition;
                             data.onPageChanged;
                             _tabController.animateTo(currentIndex);
                             _snapToPosition(position);
@@ -185,8 +189,8 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
             onSizeChange: (Size size){
               final children =  context.read<DynamicBottomSheetProvider>().sizes;
               print('SIZES: $children');
-              final canAnimateToTop = context.read<DynamicBottomSheetProvider>().updateChildSizeAt(index: index, height: size.height);
-              print('SIZES: ${context.read<DynamicBottomSheetProvider>().sizes} <= Height: $size <= MaxSnap: ${context.read<DynamicBottomSheetProvider>().maxSnapPosition.pixel} => CanAnimate: $canAnimateToTop');
+              final canAnimateToTop = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateChildSizeAt(index: index, height: size.height);
+              print('SIZES: ${Provider.of<DynamicBottomSheetProvider>(context, listen: false).sizes} <= Height: $size <= MaxSnap: ${context.read<DynamicBottomSheetProvider>().maxSnapPosition.pixel} => CanAnimate: $canAnimateToTop');
               if(canAnimateToTop){
                 /// TODO: Trigger animation
 

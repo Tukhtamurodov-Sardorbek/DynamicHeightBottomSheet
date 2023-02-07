@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 class DynamicBottomSheetProvider extends ChangeNotifier{
   late List<double> _childrenSizes;
   late double _maxSheetHeight;
-  late BoxConstraints _constraints;
+  BoxConstraints? _constraints;
 
   final double _headerHeight = SheetData.instance.titles == null ? 45 : 75;
   int _currentPageIndex = 0;
@@ -27,7 +27,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   double get currentSize => _childrenSizes[_currentPageIndex];
   double get previousSize => _childrenSizes[_previousPageIndex];
   double get currentPosition => _currentPosition;
-  double get screenHeight => _constraints.maxHeight;
+  double get screenHeight => _constraints!.maxHeight;
   double get headerHeight => _headerHeight;
   bool get hasTitles{
     if(SheetData.instance.titles == null){
@@ -74,8 +74,10 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
 
   }
   void initializeSheetHeight({required BoxConstraints boxConstraints}){
-    _constraints = boxConstraints;
-    _maxSheetHeight = _constraints.maxHeight * SheetData.instance.heightFactor;
+    if(_constraints != boxConstraints){
+      _constraints = boxConstraints;
+      _maxSheetHeight = _constraints!.maxHeight * SheetData.instance.heightFactor;
+    }
   }
   void initializeCurrentPageIndex(int index){
     _currentPageIndex = index;
