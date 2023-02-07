@@ -1,12 +1,22 @@
+import 'package:dynamicbottomsheet/src/helpers/drag_wrapper.dart';
+import 'package:dynamicbottomsheet/src/helpers/scroll_controller_override.dart';
+import 'package:dynamicbottomsheet/src/provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class OverflowPage extends StatelessWidget {
-  final ValueChanged<Size> onSizeChange;
   final Widget child;
+  final ScrollController? scrollController;
+  final ValueChanged<Size> onSizeChange;
+  final Function(double) dragUpdate;
+  final VoidCallback dragEnd;
 
   const OverflowPage({
-    required this.onSizeChange,
     required this.child,
+    this.scrollController,
+    required this.onSizeChange,
+    required this.dragUpdate,
+    required this.dragEnd,
   });
 
   @override
@@ -18,22 +28,30 @@ class OverflowPage extends StatelessWidget {
       maxWidth: null,
       alignment: Alignment.topCenter,
       child: SizeNotifier(
+        scrollController: scrollController,
         onSizeChange: onSizeChange,
+        dragUpdate: dragUpdate,
+        dragEnd: dragEnd,
         child: child,
       ),
     );
   }
 }
 
-
 class SizeNotifier extends StatefulWidget {
   final Widget child;
+  final ScrollController? scrollController;
   final ValueChanged<Size> onSizeChange;
+  final Function(double) dragUpdate;
+  final VoidCallback dragEnd;
 
   const SizeNotifier({
     Key? key,
     required this.child,
+    this.scrollController,
     required this.onSizeChange,
+    required this.dragUpdate,
+    required this.dragEnd,
   }) : super(key: key);
 
   @override
@@ -55,7 +73,10 @@ class _SizeNotifierState extends State<SizeNotifier> {
       child: SizeChangedLayoutNotifier(
         child: Container(
           key: _widgetKey,
-          child: widget.child,
+          constraints: BoxConstraints(
+            maxHeight: Provider.of<DynamicBottomSheetProvider>(context, listen: false).maxSheetHeight,
+          ),
+          child: widget.scrollController != null ? scrollableChild() : draggableChild(),
         ),
       ),
     );
@@ -69,5 +90,24 @@ class _SizeNotifierState extends State<SizeNotifier> {
       _oldSize = size;
       widget.onSizeChange(size!);
     }
+  }
+
+  Widget scrollableChild() {
+    return ScrollControllerOverride(
+      scrollController: widget.scrollController!,
+      dragUpdate: widget.dragUpdate,
+      dragEnd: widget.dragEnd,
+      currentPosition: Provider.of<DynamicBottomSheetProvider>(context, listen: false).currentPosition,
+      snappingCalculator: Provider.of<DynamicBottomSheetProvider>(context, listen: false).snappingCalculator,
+      child: widget.child,
+    );
+  }
+
+  Widget draggableChild() {
+    return DragWrapper(
+      dragEnd: widget.dragEnd,
+      dragUpdate: widget.dragUpdate,
+      child: widget.child,
+    );
   }
 }

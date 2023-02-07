@@ -3,7 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 List keys = List.generate(8, (index) => GlobalKey());
-
+List<ScrollController?> controllers = [
+  ScrollController(),
+  ScrollController(),
+  null,
+  ScrollController(),
+  null,
+  ScrollController(),
+  null,
+  ScrollController(),
+];
 void main() {
   runApp(
     MaterialApp(
@@ -67,15 +76,16 @@ class _MyAppState extends State<MyApp> {
           'Title #7',
           'Title #8',
         ],
+        scrollControllers: controllers,
         children: [
-          FWidget(key: keys[0]),
-          MWidget(key: keys[1]),
+          FWidget(key: keys[0], controller: controllers[0]!,),
+          MWidget(key: keys[1], controller: controllers[1]!,),
           Container(key: keys[2], height: 450, color: Colors.amberAccent,),
-          MWidget(key: keys[3]),
+          MWidget(key: keys[3], controller: controllers[3]!,),
           Container(key: keys[4], height: 400, color: Colors.greenAccent,),
-          MWidget(key: keys[5]),
+          MWidget(key: keys[5], controller: controllers[5]!,),
           Container(key: keys[6], height: 500, color: Colors.teal,),
-          MWidget(key: keys[7]),
+          MWidget(key: keys[7], controller: controllers[7]!,),
         ],
         scaffoldBody: Background(),
       ),
@@ -101,7 +111,8 @@ class _MyAppState extends State<MyApp> {
   }
 }
 class FWidget extends StatelessWidget {
-  const FWidget({Key? key}) : super(key: key);
+  final ScrollController controller;
+  const FWidget({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +120,7 @@ class FWidget extends StatelessWidget {
       shrinkWrap: true,
       itemCount: 10,
       padding: EdgeInsets.zero,
-      controller: ScrollController(),
+      controller: controller,
       // physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         return Container(
@@ -124,7 +135,8 @@ class FWidget extends StatelessWidget {
 }
 
 class MWidget extends StatefulWidget {
-  const MWidget({Key? key}) : super(key: key);
+  final ScrollController controller;
+  const MWidget({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<MWidget> createState() => _MWidgetState();
@@ -149,6 +161,7 @@ class _MWidgetState extends State<MWidget> {
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
+      controller: widget.controller,
       padding: EdgeInsets.zero,
       children: [
         GestureDetector(

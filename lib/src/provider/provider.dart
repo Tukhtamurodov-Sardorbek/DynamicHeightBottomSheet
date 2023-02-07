@@ -28,6 +28,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   double get previousSize => _childrenSizes[_previousPageIndex];
   double get currentPosition => _currentPosition;
   double get screenHeight => _constraints!.maxHeight;
+  double get maxSheetHeight => _maxSheetHeight;
   double get headerHeight => _headerHeight;
   bool get hasTitles{
     if(SheetData.instance.titles == null){
@@ -70,7 +71,6 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   // * Initializations
   void initializeChildrenSizes(int length){
     _childrenSizes = List.filled(length, 0.0);
-    print('Initialized Children Sizes: $_childrenSizes');
 
   }
   void initializeSheetHeight({required BoxConstraints boxConstraints}){
@@ -112,12 +112,10 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   void updateMaxSnap(){
     final height = _childrenSizes[_currentPageIndex];
     final snapPosition = SnappingPosition.pixels(positionPixels: height);
-    print('UpdateMaxSnap: Current: ${_snappingPositions[1].pixel} | New: ${height}');
     if(_snappingPositions[1] != snapPosition){
       _snappingPositions[1] = snapPosition;
       notifyListeners();
     }
-    print('UpdateMaxSnap: Current: ${_snappingPositions[1].pixel}');
   }
   bool updateChildSizeAt({required int index, required double height}) {
     final oldHeight = _childrenSizes[index];
@@ -151,10 +149,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
     return newPosition;
   }
   void updateCurrentPosition(double dragAmount){
-    final newPosition = getNewPosition(dragAmount);
-    print('NewPosition: $newPosition Current: $currentPosition CanUpdate: ${_currentPosition != newPosition}');
-    currentPosition = newPosition;
-    print('Current: $currentPosition');
+    currentPosition = getNewPosition(dragAmount);
   }
 
 }

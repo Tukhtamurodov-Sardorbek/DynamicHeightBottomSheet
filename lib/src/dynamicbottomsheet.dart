@@ -186,6 +186,9 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
         (index, child) => MapEntry(
           index,
           OverflowPage(
+            dragEnd: _dragEnd,
+            dragUpdate: _dragSheet,
+            scrollController: widget.scrollControllers?[index],
             onSizeChange: (Size size){
               final children =  context.read<DynamicBottomSheetProvider>().sizes;
               print('SIZES: $children');
@@ -227,13 +230,10 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
       _animationController.stop();
     }
     context.read<DynamicBottomSheetProvider>().updateCurrentPosition(dragAmount);
-    // setState(() {});
-    print('Drag Update $dragAmount');
   }
 
   void _dragEnd() {
     final position = context.read<DynamicBottomSheetProvider>().snappingCalculator.getBestSnappingPosition();
     _snapToPosition(position);
-    print('Drag End ${position.pixel}');
   }
 }
