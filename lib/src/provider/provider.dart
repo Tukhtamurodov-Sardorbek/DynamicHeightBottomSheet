@@ -20,6 +20,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
     const SnappingPosition.pixels(positionPixels: 0.0),
   ];
 
+  List<double> get sizes => _childrenSizes;
 
   int get currentPageIndex => _currentPageIndex;
   int get previousPageIndex => _previousPageIndex;
@@ -69,12 +70,12 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   // * Initializations
   void initializeChildrenSizes(int length){
     _childrenSizes = List.filled(length, 0.0);
+    print('Initialized Children Sizes: $_childrenSizes');
+
   }
   void initializeSheetHeight({required BoxConstraints boxConstraints}){
-    if(_constraints != boxConstraints){
-      _constraints = boxConstraints;
-      _maxSheetHeight = _constraints.maxHeight * SheetData.instance.heightFactor;
-    }
+    _constraints = boxConstraints;
+    _maxSheetHeight = _constraints.maxHeight * SheetData.instance.heightFactor;
   }
   void initializeCurrentPageIndex(int index){
     _currentPageIndex = index;
@@ -106,17 +107,30 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
       notifyListeners();
     }
   }
+  void updateMaxSnap(){
+    final height = _childrenSizes[_currentPageIndex];
+    final snapPosition = SnappingPosition.pixels(positionPixels: height);
+    print('UpdateMaxSnap: Current: ${_snappingPositions[1].pixel} | New: ${height}');
+    if(_snappingPositions[1] != snapPosition){
+      _snappingPositions[1] = snapPosition;
+      notifyListeners();
+    }
+    print('UpdateMaxSnap: Current: ${_snappingPositions[1].pixel}');
+  }
   bool updateChildSizeAt({required int index, required double height}) {
     final oldHeight = _childrenSizes[index];
     if (oldHeight != height) {
       if (height >= _maxSheetHeight) {
         if (oldHeight != _maxSheetHeight) {
           _childrenSizes[index] = _maxSheetHeight;
+          updateMaxSnap();
+
           notifyListeners();
           return oldHeight != 0.0;
         }
       } else {
         _childrenSizes[index] = height;
+        updateMaxSnap();
         notifyListeners();
         return oldHeight != 0.0;
       }
@@ -125,6 +139,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   }
   double getNewPosition(double dragAmount) {
     var newPosition = _currentPosition - dragAmount;
+
     var calculator = snappingCalculator;
     var maxPos = calculator.getBiggestPositionPixels();
     var minPos = calculator.getSmallestPositionPixels();
@@ -133,10 +148,11 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
 
     return newPosition;
   }
-
-
   void updateCurrentPosition(double dragAmount){
-    currentPosition = getNewPosition(dragAmount);
+    final newPosition = getNewPosition(dragAmount);
+    print('NewPosition: $newPosition Current: $currentPosition CanUpdate: ${_currentPosition != newPosition}');
+    currentPosition = newPosition;
+    print('Current: $currentPosition');
   }
 
 }

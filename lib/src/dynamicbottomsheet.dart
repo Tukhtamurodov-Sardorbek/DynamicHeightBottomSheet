@@ -1,3 +1,5 @@
+import 'package:dynamicbottomsheet/src/helpers/drag_wrapper.dart';
+import 'package:dynamicbottomsheet/src/helpers/header.dart';
 import 'package:dynamicbottomsheet/src/helpers/size_notifier.dart';
 import 'package:dynamicbottomsheet/src/helpers/snapping_position.dart';
 import 'package:dynamicbottomsheet/src/provider/provider.dart';
@@ -37,24 +39,10 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.children.length, vsync: this);
-    _pageController = widget.pageController ?? PageController();
     _animationController = AnimationController(vsync: this);
-
-    context.read<DynamicBottomSheetProvider>().initializeChildrenSizes(widget.children.length);
-    context.read<DynamicBottomSheetProvider>().initializeCurrentPageIndex(_pageController.initialPage.clamp(0, widget.children.length - 1));
-    context.read<DynamicBottomSheetProvider>().initializePreviousPageIndex();
-    _shouldDisposePageController = widget.pageController == null;
-
-    _pageController.addListener(() {
-      context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
-    });
     _animationController.addListener(() {
-      if(_tweenAnimation == null){
-        return;
-      } else{
-        context.read<DynamicBottomSheetProvider>().currentPosition = _tweenAnimation!.value;
-      }
+      if(_tweenAnimation == null) return;
+      context.read<DynamicBottomSheetProvider>().currentPosition = _tweenAnimation!.value;
     });
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -63,6 +51,17 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
           context.read<DynamicBottomSheetProvider>().lastSnappingPosition,
         );
       }
+    });
+    _tabController = TabController(length: widget.children.length, vsync: this);
+    _pageController = widget.pageController ?? PageController();
+
+    context.read<DynamicBottomSheetProvider>().initializeChildrenSizes(widget.children.length);
+    context.read<DynamicBottomSheetProvider>().initializeCurrentPageIndex(_pageController.initialPage.clamp(0, widget.children.length - 1));
+    context.read<DynamicBottomSheetProvider>().initializePreviousPageIndex();
+    _shouldDisposePageController = widget.pageController == null;
+
+    _pageController.addListener(() {
+      context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
     });
 
     Future.delayed(const Duration(seconds: 0)).then((value) {
@@ -114,6 +113,7 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
         return Stack(
           children: [
             Positioned.fill(child: widget.scaffoldBody),
+            header(),
             Positioned(
               left: 0,
               right: 0,
@@ -155,6 +155,27 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
     );
   }
 
+  Widget header() {
+    final position = context.read<DynamicBottomSheetProvider>().currentPosition;
+    final dragWrapper = DragWrapper(
+      dragEnd: _dragEnd,
+      dragUpdate: _dragSheet,
+      child: InheritedDynamicBottomSheetHeader(
+        childCount: widget.children.length,
+        tabController: _tabController,
+        pageController: _pageController,
+        child: const SheetHeader(),
+      ),
+    );
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: position,
+      height: context.read<DynamicBottomSheetProvider>().headerHeight,
+      child: dragWrapper,
+    );
+  }
+
   List<Widget> _sizeReportingChildren() => widget.children
       .asMap()
       .map(
@@ -162,9 +183,13 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
           index,
           OverflowPage(
             onSizeChange: (Size size){
+              final children =  context.read<DynamicBottomSheetProvider>().sizes;
+              print('SIZES: $children');
               final canAnimateToTop = context.read<DynamicBottomSheetProvider>().updateChildSizeAt(index: index, height: size.height);
+              print('SIZES: ${context.read<DynamicBottomSheetProvider>().sizes} <= Height: $size <= MaxSnap: ${context.read<DynamicBottomSheetProvider>().maxSnapPosition.pixel} => CanAnimate: $canAnimateToTop');
               if(canAnimateToTop){
                 /// TODO: Trigger animation
+
               }
             },
             child: child,
@@ -198,10 +223,13 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
       _animationController.stop();
     }
     context.read<DynamicBottomSheetProvider>().updateCurrentPosition(dragAmount);
+    // setState(() {});
+    print('Drag Update $dragAmount');
   }
 
   void _dragEnd() {
     final position = context.read<DynamicBottomSheetProvider>().snappingCalculator.getBestSnappingPosition();
     _snapToPosition(position);
+    print('Drag End ${position.pixel}');
   }
 }

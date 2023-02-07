@@ -57,6 +57,16 @@ class _MyAppState extends State<MyApp> {
       body: DynamicBottomSheet(
         heightFactor: 0.6,
         pageController: pageController,
+        titles: [
+          'Title #1',
+          'Title #2',
+          'Title #3',
+          'Title #4',
+          'Title #5',
+          'Title #6',
+          'Title #7',
+          'Title #8',
+        ],
         children: [
           FWidget(key: keys[0]),
           MWidget(key: keys[1]),
