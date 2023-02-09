@@ -1,29 +1,37 @@
 import 'package:dynamicbottomsheet/src/wrapper.dart';
 import 'package:flutter/material.dart';
 
-List keys = List.generate(8, (index) => GlobalKey());
-List<ScrollController?> controllers = [ScrollController(), ScrollController(), null, ScrollController(), null, ScrollController(), null, ScrollController(),];
+List<ScrollController?> controllers = [
+  ScrollController(),
+  ScrollController(),
+  null,
+  ScrollController(),
+  null,
+  ScrollController(),
+  null,
+  ScrollController(),
+];
 
 void main() {
   runApp(
     MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Snapping Sheet Examples',
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(
-            backgroundColor: Colors.grey[700],
-            elevation: 0,
-            foregroundColor: Colors.white,
-            titleTextStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            iconTheme: const IconThemeData(color: Colors.white),
+      debugShowCheckedModeBanner: false,
+      title: 'Snapping Sheet Examples',
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.grey[700],
+          elevation: 0,
+          foregroundColor: Colors.white,
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
-          primarySwatch: Colors.grey,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        home: const MyApp(),
+        primarySwatch: Colors.grey,
       ),
+      home: const MyApp(),
+    ),
   );
 }
 
@@ -47,13 +55,16 @@ class _MyAppState extends State<MyApp> {
     print('MAIN IS BUILT');
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Example", style: TextStyle(color: Colors.white),),
+        title: const Text(
+          "Example",
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
             icon: Icon(icon),
             onPressed: () {
               setState(() {
-                icon = icon == Icons.menu ?  Icons.account_circle_outlined : Icons.menu;
+                icon = icon == Icons.menu ? Icons.account_circle_outlined : Icons.menu;
               });
             },
           )
@@ -66,50 +77,34 @@ class _MyAppState extends State<MyApp> {
         scrollControllers: controllers,
         scaffoldBody: Background(),
         children: [
-          ExpandableList(key: keys[0], controller: controllers[0]!,),
-          MWidget(key: keys[1], controller: controllers[1]!,),
-          Container(key: keys[2], height: 150, color: Colors.amberAccent,),
-          MWidget(key: keys[3], controller: controllers[3]!,),
-          Container(key: keys[4], height: 400, color: Colors.greenAccent,),
-          ExpandableList(key: keys[5], controller: controllers[5]!,),
-          Container(key: keys[6], height: 500, color: Colors.teal,),
-          MWidget(key: keys[7], controller: controllers[7]!,),
+          ExpandableList(controller: controllers[0]!),
+          MWidget(controller: controllers[1]!),
+          Container(height: 150, color: Colors.amberAccent),
+          MWidget(controller: controllers[3]!),
+          Container(height: 400, color: Colors.greenAccent),
+          ExpandableList(controller: controllers[5]!),
+          Container(height: 500, color: Colors.teal),
+          MWidget(controller: controllers[7]!),
         ],
       ),
     );
   }
-
-  // Widget SWidget({required Key key}) {
-  //   return Container(
-  //     key: key,
-  //     height: 180,
-  //     color: Colors.deepPurple,
-  //   );
-  // }
-  //
-  // Widget list({required Key key}) {
-  //   return ListView(
-  //     children: [
-  //       Container(height: 180, color: Colors.deepPurple),
-  //       Container(height: 180, color: Colors.deepOrange),
-  //       Container(height: 180, color: Colors.deepPurpleAccent),
-  //     ],
-  //   );
-  // }
 }
-
 
 class ExpandableList extends StatefulWidget {
   final ScrollController controller;
+
   const ExpandableList({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<ExpandableList> createState() => _ExpandableListState();
 }
 
-class _ExpandableListState extends State<ExpandableList> with AutomaticKeepAliveClientMixin{
+class _ExpandableListState extends State<ExpandableList>
+    with AutomaticKeepAliveClientMixin {
   int count = 2;
   Color color = Colors.orangeAccent;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -120,10 +115,12 @@ class _ExpandableListState extends State<ExpandableList> with AutomaticKeepAlive
       controller: widget.controller,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: (){
+          onTap: () {
             setState(() {
               count = count == 22 ? 2 : count += 10;
-              color = color == Colors.orangeAccent ? Colors.pinkAccent : Colors.orangeAccent;
+              color = color == Colors.orangeAccent
+                  ? Colors.pinkAccent
+                  : Colors.orangeAccent;
             });
           },
           child: Container(
@@ -141,9 +138,9 @@ class _ExpandableListState extends State<ExpandableList> with AutomaticKeepAlive
   bool get wantKeepAlive => true;
 }
 
-
 class FWidget extends StatelessWidget {
   final ScrollController controller;
+
   const FWidget({Key? key, required this.controller}) : super(key: key);
 
   @override
@@ -168,6 +165,7 @@ class FWidget extends StatelessWidget {
 
 class MWidget extends StatefulWidget {
   final ScrollController controller;
+
   const MWidget({Key? key, required this.controller}) : super(key: key);
 
   @override
@@ -303,58 +301,58 @@ class _MWidgetState extends State<MWidget> {
         GestureDetector(
           onTap: () {
             setState(() {
-color = Colors.tealAccent;
-});
-},
-child: Container(
-height: 100,
-color: color,
-margin: const EdgeInsets.only(bottom: 4),
-child: const Center(child: Text('0')),
-),
-),
-GestureDetector(
-onTap: () {
-setState(() {
-color = Colors.tealAccent;
-});
-},
-child: Container(
-height: 100,
-color: color,
-margin: const EdgeInsets.only(bottom: 4),
-child: const Center(child: Text('1')),
-),
-),
-GestureDetector(
-onTap: () {
-setState(() {
-color = Colors.tealAccent;
-});
-},
-child: Container(
-height: 100,
-color: color,
-margin: const EdgeInsets.only(bottom: 4),
-child: const Center(child: Text('2')),
-),
-),
-GestureDetector(
-onTap: () {
-setState(() {
-color = Colors.tealAccent;
-});
-},
-child: Container(
-height: 100,
-color: color,
-margin: const EdgeInsets.only(bottom: 4),
-child: const Center(child: Text('3')),
-),
-),
-],
-);
-}
+              color = Colors.tealAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: const Center(child: Text('0')),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              color = Colors.tealAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: const Center(child: Text('1')),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              color = Colors.tealAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: const Center(child: Text('2')),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              color = Colors.tealAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: const Center(child: Text('3')),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class Background extends StatelessWidget {
