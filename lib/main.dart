@@ -46,8 +46,6 @@ class _MyAppState extends State<MyApp> {
   final PageController pageController = PageController();
   final ScrollController listViewController = ScrollController();
 
-  var icon = Icons.menu;
-
   @override
   Widget build(BuildContext context) {
     print('');
@@ -55,20 +53,11 @@ class _MyAppState extends State<MyApp> {
     print('MAIN IS BUILT');
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text(
-          "Example",
+          "Dynamic Bottom Sheet",
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(icon),
-            onPressed: () {
-              setState(() {
-                icon = icon == Icons.menu ? Icons.account_circle_outlined : Icons.menu;
-              });
-            },
-          )
-        ],
       ),
       body: DynamicBottomSheet(
         heightFactor: 0.6,
