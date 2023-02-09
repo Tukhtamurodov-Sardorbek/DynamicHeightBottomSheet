@@ -1,18 +1,9 @@
 import 'package:dynamicbottomsheet/src/wrapper.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 List keys = List.generate(8, (index) => GlobalKey());
-List<ScrollController?> controllers = [
-  ScrollController(),
-  ScrollController(),
-  null,
-  ScrollController(),
-  null,
-  ScrollController(),
-  null,
-  ScrollController(),
-];
+List<ScrollController?> controllers = [ScrollController(), ScrollController(), null, ScrollController(), null, ScrollController(), null, ScrollController(),];
+
 void main() {
   runApp(
     MaterialApp(
@@ -47,68 +38,64 @@ class _MyAppState extends State<MyApp> {
   final PageController pageController = PageController();
   final ScrollController listViewController = ScrollController();
 
+  var icon = Icons.menu;
+
   @override
   Widget build(BuildContext context) {
-    // print('MAIN BUILT');
+    print('');
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    print('MAIN IS BUILT');
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Example",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Example", style: TextStyle(color: Colors.white),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
+            icon: Icon(icon),
+            onPressed: () {
+              setState(() {
+                icon = icon == Icons.menu ?  Icons.account_circle_outlined : Icons.menu;
+              });
+            },
           )
         ],
       ),
       body: DynamicBottomSheet(
         heightFactor: 0.6,
         pageController: pageController,
-        titles: [
-          'Title #1',
-          'Title #2',
-          'Title #3',
-          'Title #4',
-          'Title #5',
-          'Title #6',
-          'Title #7',
-          'Title #8',
-        ],
+        titles: const ['Title #1', 'Title #2', 'Title #3', 'Title #4', 'Title #5', 'Title #6', 'Title #7', 'Title #8',],
         scrollControllers: controllers,
+        scaffoldBody: Background(),
         children: [
           ExpandableList(key: keys[0], controller: controllers[0]!,),
           MWidget(key: keys[1], controller: controllers[1]!,),
-          Container(key: keys[2], height: 450, color: Colors.amberAccent,),
+          Container(key: keys[2], height: 150, color: Colors.amberAccent,),
           MWidget(key: keys[3], controller: controllers[3]!,),
           Container(key: keys[4], height: 400, color: Colors.greenAccent,),
-          MWidget(key: keys[5], controller: controllers[5]!,),
+          ExpandableList(key: keys[5], controller: controllers[5]!,),
           Container(key: keys[6], height: 500, color: Colors.teal,),
           MWidget(key: keys[7], controller: controllers[7]!,),
         ],
-        scaffoldBody: Background(),
       ),
     );
   }
 
-  Widget SWidget({required Key key}) {
-    return Container(
-      key: key,
-      height: 180,
-      color: Colors.deepPurple,
-    );
-  }
-
-  Widget list({required Key key}) {
-    return ListView(
-      children: [
-        Container(height: 180, color: Colors.deepPurple),
-        Container(height: 180, color: Colors.deepOrange),
-        Container(height: 180, color: Colors.deepPurpleAccent),
-      ],
-    );
-  }
+  // Widget SWidget({required Key key}) {
+  //   return Container(
+  //     key: key,
+  //     height: 180,
+  //     color: Colors.deepPurple,
+  //   );
+  // }
+  //
+  // Widget list({required Key key}) {
+  //   return ListView(
+  //     children: [
+  //       Container(height: 180, color: Colors.deepPurple),
+  //       Container(height: 180, color: Colors.deepOrange),
+  //       Container(height: 180, color: Colors.deepPurpleAccent),
+  //     ],
+  //   );
+  // }
 }
 
 

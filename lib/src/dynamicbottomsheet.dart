@@ -97,6 +97,7 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
 
   @override
   Widget build(BuildContext context) {
+    print('SHEET IS BUILT');
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         context.read<DynamicBottomSheetProvider>().initializeSheetHeight(boxConstraints: boxConstraints);

@@ -56,6 +56,7 @@ class DynamicBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('WRAPPER IS BUILT');
     return ChangeNotifierProvider(
       create: (context) => DynamicBottomSheetProvider(),
       child: WrappedDynamicBottomSheet(
