@@ -102,41 +102,42 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
     _previousPageIndex = _previousPageIndex.clamp(0, _childrenSizes.length - 1);
     _childrenSizes[_currentPageIndex] = currentPageSize;
   }
-  void updatePage(int newPageIndex) {
+  void updatePageIndex(int newPageIndex) {
     if (_currentPageIndex != newPageIndex) {
       _previousPageIndex = _currentPageIndex;
       _currentPageIndex = newPageIndex;
       notifyListeners();
     }
   }
-  void updateMaxSnap(){
+  bool updateMaxSnap(){
     final height = _childrenSizes[_currentPageIndex];
     final snapPosition = SnappingPosition.pixels(positionPixels: height);
-    if(_snappingPositions[1] != snapPosition){
+    final canUpdate = _snappingPositions[1] != snapPosition;
+
+    if(canUpdate){
       _snappingPositions[1] = snapPosition;
       notifyListeners();
     }
+
+    return canUpdate;
   }
-  bool updateChildSizeAt({required int index, required double height}) {
+  double updateChildSizeAt({required int index, required double height}) {
     final oldHeight = _childrenSizes[index];
+
     if (oldHeight != height) {
       if (height >= _maxSheetHeight) {
         if (oldHeight != _maxSheetHeight) {
           _childrenSizes[index] = _maxSheetHeight;
-          updateMaxSnap();
-
           notifyListeners();
-          return oldHeight != 0.0;
         }
       } else {
         _childrenSizes[index] = height;
-        updateMaxSnap();
         notifyListeners();
-        return oldHeight != 0.0;
       }
     }
-    return false;
+    return oldHeight;
   }
+
   double getNewPosition(double dragAmount) {
     var newPosition = _currentPosition - dragAmount;
 

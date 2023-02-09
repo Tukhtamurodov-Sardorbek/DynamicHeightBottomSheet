@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('MAIN BUILT');
+    // print('MAIN BUILT');
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
         ],
         scrollControllers: controllers,
         children: [
-          FWidget(key: keys[0], controller: controllers[0]!,),
+          ExpandableList(key: keys[0], controller: controllers[0]!,),
           MWidget(key: keys[1], controller: controllers[1]!,),
           Container(key: keys[2], height: 450, color: Colors.amberAccent,),
           MWidget(key: keys[3], controller: controllers[3]!,),
@@ -110,6 +110,51 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
+class ExpandableList extends StatefulWidget {
+  final ScrollController controller;
+  const ExpandableList({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  State<ExpandableList> createState() => _ExpandableListState();
+}
+
+class _ExpandableListState extends State<ExpandableList> with AutomaticKeepAliveClientMixin{
+  int count = 2;
+  Color color = Colors.orangeAccent;
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: count,
+      padding: EdgeInsets.zero,
+      controller: widget.controller,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: (){
+            setState(() {
+              count = count == 22 ? 2 : count += 10;
+              color = color == Colors.orangeAccent ? Colors.pinkAccent : Colors.orangeAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: Center(child: Text(index.toString())),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+
 class FWidget extends StatelessWidget {
   final ScrollController controller;
   const FWidget({Key? key, required this.controller}) : super(key: key);

@@ -31,8 +31,8 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
   @override
   void initState() {
     super.initState();
-    print('ScrollController InitState');
-    print('PORT RECEIVE: ${widget.scrollController}');
+    // print('ScrollController InitState');
+    // print('PORT RECEIVE: ${widget.scrollController}');
     widget.scrollController.removeListener(_onScrollUpdate);
     widget.scrollController.addListener(_onScrollUpdate);
   }
@@ -44,7 +44,7 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
   }
 
   void _onScrollUpdate() {
-    print('CanScroll: $_allowScrolling | Direction: $_currentDragDirection | CurrentPosition: ${widget.currentPosition} | MaxHeight: ${_biggestSnapPos}');
+    // print('CanScroll: $_allowScrolling | Direction: $_currentDragDirection | CurrentPosition: ${widget.currentPosition} | MaxHeight: ${_biggestSnapPos}');
     if (!_allowScrolling){
       _lockScrollPosition(widget.scrollController);
     }
@@ -85,10 +85,8 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
     return false;
   }
 
-  double get _biggestSnapPos =>
-      widget.snappingCalculator.getBiggestPositionPixels();
-  double get _smallestSnapPos =>
-      widget.snappingCalculator.getSmallestPositionPixels();
+  double get _biggestSnapPos => widget.snappingCalculator.getBiggestPositionPixels();
+  double get _smallestSnapPos => widget.snappingCalculator.getSmallestPositionPixels();
 
   void _lockScrollPosition(ScrollController controller) {
     controller.position.setPixels(_currentLockPosition);
@@ -108,10 +106,14 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
         _overrideScroll(dragValue);
       },
       onPointerUp: (_) {
-        // if (!_allowScrolling) {
-        //   widget.scrollController.jumpTo(_currentLockPosition);
-        // }
-        widget.dragEnd();
+        if (!_allowScrolling) {
+          widget.scrollController.jumpTo(_currentLockPosition);
+        }
+        if(widget.currentPosition < _biggestSnapPos){
+          print('*** SCROLL DRAG ***');
+          widget.dragEnd();
+          print('*******************');
+        }
       },
       child: widget.child,
     );

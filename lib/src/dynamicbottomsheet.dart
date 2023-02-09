@@ -72,24 +72,13 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
     context.read<DynamicBottomSheetProvider>().initializePreviousPageIndex();
 
     _shouldDisposePageController = widget.pageController == null;
-
-    _pageController.addListener(() {
-      context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
-    });
-
   }
 
   @override
   void didUpdateWidget(covariant WrappedDynamicBottomSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pageController != widget.pageController) {
-      oldWidget.pageController?.removeListener(() {
-        context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
-      });
       _pageController = widget.pageController ?? PageController();
-      _pageController.addListener(() {
-        context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
-      });
       _shouldDisposePageController = widget.pageController == null;
     }
     if (oldWidget.children.length != widget.children.length) {
@@ -99,9 +88,6 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
 
   @override
   void dispose() {
-    _pageController.removeListener(() {
-      context.read<DynamicBottomSheetProvider>().updatePage(_pageController.page!.round());
-    });
     if (_shouldDisposePageController) {
       _pageController.dispose();
     }
@@ -123,7 +109,7 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
               right: 0,
               top: context.read<DynamicBottomSheetProvider>().screenHeight - context.read<DynamicBottomSheetProvider>().currentPosition,
               child: ColoredBox(
-                color: Colors.tealAccent,
+                color: Colors.white,
                 child: TweenAnimationBuilder<double>(
                   curve: Curves.easeInOutCubic,
                   duration: const Duration(milliseconds: 200),
@@ -135,11 +121,13 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
                       Future.delayed(
                           const Duration(milliseconds: 30),
                           (){
-                            final currentIndex = Provider.of<DynamicBottomSheetProvider>(context, listen: false).currentPageIndex;
-                            final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).maxSnapPosition;
-                            data.onPageChanged;
-                            _tabController.animateTo(currentIndex);
-                            _snapToPosition(position);
+                            Provider.of<DynamicBottomSheetProvider>(context, listen: false).updatePageIndex(index);
+                            final canAnimate = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateMaxSnap();
+                            _tabController.animateTo(index);
+                            if(canAnimate){
+                              final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).maxSnapPosition;
+                              _snapToPosition(position, 'OnPageChanged');
+                            }
                           }
                       );
                     },
@@ -158,6 +146,32 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
       }
     );
   }
+
+
+  List<Widget> _sizeReportingChildren() => widget.children
+      .asMap()
+      .map(
+        (index, child) => MapEntry(
+      index,
+      OverflowPage(
+        dragEnd: _dragEnd,
+        dragUpdate: _dragSheet,
+        scrollController: widget.scrollControllers?[index],
+        onSizeChange: (Size size){
+          final oldHeight = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateChildSizeAt(index: index, height: size.height);
+
+          final canAnimate = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateMaxSnap();
+          if(canAnimate && oldHeight != 0.0){
+            final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).maxSnapPosition;
+            _snapToPosition(position, 'Child');
+          }
+        },
+        child: child,
+      ),
+    ),
+  )
+      .values
+      .toList();
 
   Widget header() {
     final position = context.read<DynamicBottomSheetProvider>().currentPosition;
@@ -180,33 +194,8 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
     );
   }
 
-  List<Widget> _sizeReportingChildren() => widget.children
-      .asMap()
-      .map(
-        (index, child) => MapEntry(
-          index,
-          OverflowPage(
-            dragEnd: _dragEnd,
-            dragUpdate: _dragSheet,
-            scrollController: widget.scrollControllers?[index],
-            onSizeChange: (Size size){
-              final children =  context.read<DynamicBottomSheetProvider>().sizes;
-              print('SIZES: $children');
-              final canAnimateToTop = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateChildSizeAt(index: index, height: size.height);
-              print('SIZES: ${Provider.of<DynamicBottomSheetProvider>(context, listen: false).sizes} <= Height: $size <= MaxSnap: ${context.read<DynamicBottomSheetProvider>().maxSnapPosition.pixel} => CanAnimate: $canAnimateToTop');
-              if(canAnimateToTop){
-                /// TODO: Trigger animation
-
-              }
-            },
-            child: child,
-          ),
-        ),
-      )
-      .values
-      .toList();
-
-  TickerFuture _snapToPosition(SnappingPosition snappingPosition) {
+  TickerFuture _snapToPosition(SnappingPosition snappingPosition, String caller) {
+    print('$caller called Animation');
     final position = context.read<DynamicBottomSheetProvider>().createPositionData;
     data.onSnapStart?.call(position, snappingPosition);
     context.read<DynamicBottomSheetProvider>().lastSnappingPosition = snappingPosition;
@@ -234,6 +223,12 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet> w
 
   void _dragEnd() {
     final position = context.read<DynamicBottomSheetProvider>().snappingCalculator.getBestSnappingPosition();
-    _snapToPosition(position);
+    _snapToPosition(position, 'DragEnd');
+
+    // final canAnimate = Provider.of<DynamicBottomSheetProvider>(context, listen: false).updateMaxSnap();
+    // if(canAnimate){
+    //   final position = context.read<DynamicBottomSheetProvider>().snappingCalculator.getBestSnappingPosition();
+    //   _snapToPosition(position, 'DragEnd');
+    // }
   }
 }

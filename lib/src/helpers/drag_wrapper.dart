@@ -15,6 +15,7 @@ class DragWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: (){},
       onVerticalDragEnd: (_) {
         dragEnd();
       },
