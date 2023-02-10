@@ -1,5 +1,6 @@
-import 'package:dynamicbottomsheet/src/helpers/snapping_calculator.dart';
+import 'package:dynamicbottomsheet/src/provider/provider.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 class ScrollControllerOverride extends StatefulWidget {
   final ScrollController scrollController;
@@ -8,7 +9,6 @@ class ScrollControllerOverride extends StatefulWidget {
   final Function(double) dragUpdate;
   final VoidCallback dragEnd;
   final double currentPosition;
-  final SnappingCalculator snappingCalculator;
 
   const ScrollControllerOverride({
     super.key,
@@ -16,7 +16,6 @@ class ScrollControllerOverride extends StatefulWidget {
     required this.dragUpdate,
     required this.dragEnd,
     required this.currentPosition,
-    required this.snappingCalculator,
     required this.child,
   });
 
@@ -64,10 +63,13 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
     }
   }
 
+  double get maxPinPosition => context.read<DynamicBottomSheetProvider>().topPinPosition;
+  double get minPinPosition => context.read<DynamicBottomSheetProvider>().bottomPinPosition;
+
   bool get _allowScrolling {
     if(widget.scrollController.hasClients){
       if (_currentDragDirection == DragDirection.up) {
-        if (widget.currentPosition >= _biggestSnapPos) {
+        if (widget.currentPosition >= maxPinPosition) {
           return true;
         } else {
           return false;
@@ -75,7 +77,7 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
       }
       if (_currentDragDirection == DragDirection.down) {
         if (widget.scrollController.position.pixels > 0) return true;
-        if (widget.currentPosition <= _smallestSnapPos) {
+        if (widget.currentPosition <= minPinPosition) {
           return true;
         } else {
           return false;
@@ -84,9 +86,6 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
     }
     return false;
   }
-
-  double get _biggestSnapPos => widget.snappingCalculator.getBiggestPositionPixels();
-  double get _smallestSnapPos => widget.snappingCalculator.getSmallestPositionPixels();
 
   void _lockScrollPosition(ScrollController controller) {
     controller.position.setPixels(_currentLockPosition);
@@ -109,10 +108,8 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
         if (!_allowScrolling) {
           widget.scrollController.jumpTo(_currentLockPosition);
         }
-        if(widget.currentPosition < _biggestSnapPos){
-          print('*** SCROLL DRAG ***');
+        if(widget.currentPosition < maxPinPosition){
           widget.dragEnd();
-          print('*******************');
         }
       },
       child: widget.child,

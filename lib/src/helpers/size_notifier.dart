@@ -12,6 +12,7 @@ class OverflowPage extends StatelessWidget {
   final VoidCallback dragEnd;
 
   const OverflowPage({
+    super.key,
     required this.child,
     this.scrollController,
     required this.onSizeChange,
@@ -98,7 +99,6 @@ class _SizeNotifierState extends State<SizeNotifier> {
       dragUpdate: widget.dragUpdate,
       dragEnd: widget.dragEnd,
       currentPosition: Provider.of<DynamicBottomSheetProvider>(context, listen: false).currentPosition,
-      snappingCalculator: Provider.of<DynamicBottomSheetProvider>(context, listen: false).snappingCalculator,
       child: widget.child,
     );
   }

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 class InheritedDynamicBottomSheetHeader extends InheritedWidget {
   final TabController tabController;
   final PageController pageController;
+  final TickerFuture Function(double, String) snapToPosition;
   final int childCount;
 
   const InheritedDynamicBottomSheetHeader({
@@ -14,6 +15,7 @@ class InheritedDynamicBottomSheetHeader extends InheritedWidget {
     required this.childCount,
     required this.tabController,
     required this.pageController,
+    required this.snapToPosition,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -35,16 +37,13 @@ class SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('HEADER IS BUILT');
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-
+    final data = SheetData.instance;
     return Material(
-      elevation: 8.0,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      elevation: data.headerElevation ?? 8.0,
+      borderRadius: data.headerBorderRadius ?? const BorderRadius.vertical(top: Radius.circular(30)),
       child: Container(
-        height: context.read<DynamicBottomSheetProvider>().headerHeight,
         padding: const EdgeInsets.only(top: 10, bottom: 6),
-        decoration: const BoxDecoration(
+        decoration: data.headerDecoration ?? const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
@@ -52,10 +51,10 @@ class SheetHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              height: 4,
-              width: 54,
-              decoration: BoxDecoration(
-                color: SheetData.instance.grabbingColor ?? Colors.grey,
+              height: data.grabbingSize?.height ?? 4,
+              width: data.grabbingSize?.width ?? 54,
+              decoration: data.grabbingDecoration ?? BoxDecoration(
+                color: Colors.grey,
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
@@ -80,16 +79,29 @@ class _SheetTabBar extends StatelessWidget {
     final childCount = InheritedDynamicBottomSheetHeader.of(context).childCount;
     final tabController = InheritedDynamicBottomSheetHeader.of(context).tabController;
     final pageController = InheritedDynamicBottomSheetHeader.of(context).pageController;
+    final snapToPosition = InheritedDynamicBottomSheetHeader.of(context).snapToPosition;
 
     return TabBar(
       onTap: (index) {
-        pageController.jumpToPage(index);
+        final currentPageIndex = Provider.of<DynamicBottomSheetProvider>(context, listen: false).currentPageIndex;
+        final lastPosition = context.read<DynamicBottomSheetProvider>().lastPinPosition;
+
+        if(index == currentPageIndex){
+          final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).topPinPosition;
+          if(lastPosition == position){
+            final minPosition = Provider.of<DynamicBottomSheetProvider>(context, listen: false).bottomPinPosition;
+            snapToPosition.call(minPosition, 'Tab');
+          } else{
+            snapToPosition.call(position, 'Tab');
+          }
+        }else{
+          pageController.jumpToPage(index);
+        }
       },
       controller: tabController,
       isScrollable: childCount > 4,
       physics: childCount > 4 ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
-      // indicatorPadding: const EdgeInsets.symmetric(horizontal: -4),
-      padding: EdgeInsets.symmetric(horizontal: data.horizontalPadding ?? 0),
+      padding: data.tabBarPadding ?? const EdgeInsets.symmetric(horizontal: 16),
       labelColor: data.selectedTitleColor ?? Colors.white,
       unselectedLabelColor: data.unselectedTitleColor ?? Colors.blueGrey,
       labelStyle: data.titleStyle ?? const TextStyle(
@@ -102,9 +114,9 @@ class _SheetTabBar extends StatelessWidget {
       ),
       indicatorWeight: 0.0,
       indicatorSize: TabBarIndicatorSize.tab,
-      indicator: BoxDecoration(
+      indicator: data.tabIndicatorDecoration ?? BoxDecoration(
         borderRadius: BorderRadius.circular(20), // Creates border
-        color: data.indicatorColor ?? CupertinoColors.activeGreen,
+        color: CupertinoColors.activeGreen,
       ),
       tabs: [
         for(int i = 0; i < childCount; i++)

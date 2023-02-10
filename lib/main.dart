@@ -1,6 +1,8 @@
 import 'package:dynamicbottomsheet/src/wrapper.dart';
 import 'package:flutter/material.dart';
 
+// SheetData.instance.onPageChanged?.call(_currentPageIndex);
+
 List<ScrollController?> controllers = [
   ScrollController(),
   ScrollController(),
@@ -48,9 +50,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('');
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    print('MAIN IS BUILT');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -60,11 +59,29 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       body: DynamicBottomSheet(
-        heightFactor: 0.6,
-        pageController: pageController,
+        heightFactor: 0.5,
         titles: const ['Title #1', 'Title #2', 'Title #3', 'Title #4', 'Title #5', 'Title #6', 'Title #7', 'Title #8',],
+        // initialPosition: 250,
+
+          // headerElevation: 8,
+          // headerBorderRadius: headerBorderRadius,
+          // headerDecoration: headerDecoration,
+          // grabbingConstraints: grabbingConstraints,
+          // grabbingDecoration: grabbingDecoration,
+          // tabBarPadding: tabBarPadding,
+          // selectedTitleColor: selectedTitleColor,
+          // unselectedTitleColor: unselectedTitleColor,
+          // titleStyle: titleStyle,
+          // tabIndicatorDecoration: tabIndicatorDecoration,
+          // onPageChanged: onPageChanged,
+          // onSheetMoved: onSheetMoved,
+          // onSnapCompleted: onSnapCompleted,
+          // onSnapStart: onSnapStart,
+
+
+        pageController: pageController,
         scrollControllers: controllers,
-        scaffoldBody: Background(),
+        scaffoldBody: const Background(),
         children: [
           ExpandableList(controller: controllers[0]!),
           MWidget(controller: controllers[1]!),
@@ -344,16 +361,49 @@ class _MWidgetState extends State<MWidget> {
   }
 }
 
-class Background extends StatelessWidget {
+class Background extends StatefulWidget {
+  const Background({super.key});
+
+  @override
+  State<Background> createState() => _BackgroundState();
+}
+
+class _BackgroundState extends State<Background> {
+  int count = 2;
+
+  Color color = Colors.orangeAccent;
+
   @override
   Widget build(BuildContext context) {
-    return Placeholder(
-      color: Colors.amberAccent,
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: count,
+      padding: EdgeInsets.zero,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              count = count == 22 ? 2 : count += 10;
+              color = color == Colors.orangeAccent
+                  ? Colors.pinkAccent
+                  : Colors.orangeAccent;
+            });
+          },
+          child: Container(
+            height: 100,
+            color: color,
+            margin: const EdgeInsets.only(bottom: 4),
+            child: Center(child: Text(index.toString())),
+          ),
+        );
+      },
     );
   }
 }
 
 class GrabbingWidget extends StatelessWidget {
+  const GrabbingWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

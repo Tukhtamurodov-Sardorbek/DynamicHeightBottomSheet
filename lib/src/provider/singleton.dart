@@ -1,110 +1,124 @@
-import 'package:dynamicbottomsheet/src/helpers/sheet_position_data.dart';
-import 'package:dynamicbottomsheet/src/helpers/snapping_position.dart';
 import 'package:flutter/material.dart';
 
 class SheetData {
   final double _heightFactor;
   final List<String>? _titles;
-  // final PageController? _pageController;
-  final SnappingPosition? _initialPosition;
+  final double? _initialPosition;
   final ValueChanged<int>? _onPageChanged;
-  final Function(SheetPositionData positionData)? _onSheetMoved;
-  final Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? _onSnapCompleted;
-  final Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? _onSnapStart;
+  final Function(double pixel)? _onSheetMoved;
+  final Function(double pixel)? _onSnapCompleted;
+  final Function(double pixel)? _onSnapStart;
 
-  final Color? _grabbingColor;
-  final Color? _indicatorColor;
+  final double? _headerElevation;
+  final BorderRadiusGeometry? _headerBorderRadius;
+  final Decoration? _headerDecoration;
+  final Size? _grabbingSize;
+  final Decoration? _grabbingDecoration;
+  final EdgeInsetsGeometry? _tabBarPadding;
   final Color? _selectedTitleColor;
   final Color? _unselectedTitleColor;
   final TextStyle? _titleStyle;
-  final double? _horizontalPadding;
+  final Decoration? _tabIndicatorDecoration;
 
   const SheetData._internal({
     required double heightFactor,
     List<String>? titles,
-    // PageController? pageController,
-    SnappingPosition? initialPosition,
-    Color? grabbingColor,
-    Color? indicatorColor,
+    double? initialPosition,
+    double? headerElevation,
+    BorderRadiusGeometry? headerBorderRadius,
+    Decoration? headerDecoration,
+    Size? grabbingSize,
+    Decoration? grabbingDecoration,
+    EdgeInsetsGeometry? tabBarPadding,
     Color? selectedTitleColor,
     Color? unselectedTitleColor,
     TextStyle? titleStyle,
-    double? horizontalPadding,
+    Decoration? tabIndicatorDecoration,
     ValueChanged<int>? onPageChanged,
-    Function(SheetPositionData positionData)? onSheetMoved,
-    Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? onSnapCompleted,
-    Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? onSnapStart,
+    Function(double pixel)? onSheetMoved,
+    Function(double pixel)? onSnapCompleted,
+    Function(double pixel)? onSnapStart,
   })  : _heightFactor = heightFactor,
         _initialPosition = initialPosition,
         _onPageChanged = onPageChanged,
         _titles = titles,
-        _grabbingColor = grabbingColor,
-        _indicatorColor = indicatorColor,
+        _headerElevation = headerElevation,
+        _headerBorderRadius = headerBorderRadius,
+        _headerDecoration = headerDecoration,
+        _grabbingSize = grabbingSize,
+        _grabbingDecoration = grabbingDecoration,
+        _tabBarPadding = tabBarPadding,
         _selectedTitleColor = selectedTitleColor,
         _unselectedTitleColor = unselectedTitleColor,
         _titleStyle = titleStyle,
-        _horizontalPadding = horizontalPadding,
-        // _pageController = pageController,
+        _tabIndicatorDecoration = tabIndicatorDecoration,
         _onSheetMoved = onSheetMoved,
         _onSnapCompleted = onSnapCompleted,
         _onSnapStart = onSnapStart;
 
-
   double get heightFactor => _heightFactor;
-  SnappingPosition? get initialPosition => _initialPosition;
+  double? get initialPosition => _initialPosition;
   List<String>? get titles => _titles;
-  Color? get grabbingColor => _grabbingColor;
-  Color? get indicatorColor => _indicatorColor;
+  double? get headerElevation => _headerElevation;
+  BorderRadiusGeometry? get headerBorderRadius => _headerBorderRadius;
+  Decoration? get headerDecoration => _headerDecoration;
+  Size? get grabbingSize => _grabbingSize;
+  Decoration? get grabbingDecoration => _grabbingDecoration;
+  EdgeInsetsGeometry? get tabBarPadding => _tabBarPadding;
   Color? get selectedTitleColor => _selectedTitleColor;
   Color? get unselectedTitleColor => _unselectedTitleColor;
   TextStyle? get titleStyle => _titleStyle;
-  double? get horizontalPadding => _horizontalPadding;
-  // PageController? get pageController => _pageController;
+  Decoration? get tabIndicatorDecoration => _tabIndicatorDecoration;
   ValueChanged<int>? get onPageChanged => _onPageChanged;
-  Function(SheetPositionData positionData)? get onSheetMoved => _onSheetMoved;
-  Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? get onSnapCompleted => _onSnapCompleted;
-  Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? get onSnapStart => _onSnapStart;
-
+  Function(double pixel)? get onSheetMoved => _onSheetMoved;
+  Function(double pixel)? get onSnapCompleted => _onSnapCompleted;
+  Function(double pixel)? get onSnapStart => _onSnapStart;
 
   static SheetData? _instance;
   static SheetData get instance => _instance!;
   static bool get isCreated => _instance != null;
-
-  static void nullify(){
+  static void nullify() {
     _instance = null;
   }
 
   static void createInstance({
     required double heightFactor,
+
     List<String>? titles,
-    // PageController? pageController,
-    SnappingPosition? initialPosition,
-    Color? grabbingColor,
-    Color? indicatorColor,
+    double? initialPosition,
+    double? headerElevation,
+    BorderRadiusGeometry? headerBorderRadius,
+    Decoration? headerDecoration,
+    Size? grabbingSize,
+    Decoration? grabbingDecoration,
+    EdgeInsetsGeometry? tabBarPadding,
     Color? selectedTitleColor,
     Color? unselectedTitleColor,
     TextStyle? titleStyle,
-    double? horizontalPadding,
+    Decoration? tabIndicatorDecoration,
     ValueChanged<int>? onPageChanged,
-    Function(SheetPositionData positionData)? onSheetMoved,
-    Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? onSnapCompleted,
-    Function(SheetPositionData positionData, SnappingPosition snappingPosition,)? onSnapStart,
-  }){
+    Function(double pixel)? onSheetMoved,
+    Function(double pixel)? onSnapCompleted,
+    Function(double pixel)? onSnapStart,
+  }) {
     _instance ??= SheetData._internal(
-      heightFactor: heightFactor,
-      titles: titles,
-      // pageController: pageController,
-      grabbingColor: grabbingColor,
-      indicatorColor: indicatorColor,
-      selectedTitleColor: selectedTitleColor,
-      unselectedTitleColor: unselectedTitleColor,
-      titleStyle: titleStyle,
-      horizontalPadding: horizontalPadding,
-      initialPosition: initialPosition,
-      onPageChanged: onPageChanged,
-      onSheetMoved: onSheetMoved,
-      onSnapCompleted: onSnapCompleted,
-      onSnapStart: onSnapStart,
+        heightFactor: heightFactor,
+        titles: titles,
+        initialPosition: initialPosition,
+        headerElevation: headerElevation,
+        headerBorderRadius: headerBorderRadius,
+        headerDecoration: headerDecoration,
+        grabbingSize: grabbingSize,
+        grabbingDecoration: grabbingDecoration,
+        tabBarPadding: tabBarPadding,
+        selectedTitleColor: selectedTitleColor,
+        unselectedTitleColor: unselectedTitleColor,
+        titleStyle: titleStyle,
+        tabIndicatorDecoration: tabIndicatorDecoration,
+        onPageChanged: onPageChanged,
+        onSheetMoved: onSheetMoved,
+        onSnapCompleted: onSnapCompleted,
+        onSnapStart: onSnapStart,
     );
   }
 }

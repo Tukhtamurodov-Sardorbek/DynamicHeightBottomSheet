@@ -1,27 +1,25 @@
-import 'package:dynamicbottomsheet/src/helpers/sheet_position_data.dart';
-import 'package:dynamicbottomsheet/src/helpers/snapping_calculator.dart';
-import 'package:dynamicbottomsheet/src/helpers/snapping_position.dart';
 import 'package:dynamicbottomsheet/src/provider/singleton.dart';
 import 'package:flutter/cupertino.dart';
 
+enum DragDirection {
+  up,
+  down,
+}
+
 class DynamicBottomSheetProvider extends ChangeNotifier{
+  // * Data members
   late List<double> _childrenSizes;
   late double _maxSheetHeight;
   BoxConstraints? _constraints;
-
-  final double _headerHeight = SheetData.instance.titles == null ? 45 : 75;
+  // final double _headerHeight = SheetData.instance.titles == null ? 45 : 75;
   int _currentPageIndex = 0;
   int _previousPageIndex = 0;
-
   double _currentPosition = 0.0;
-  SnappingPosition _lastSnappingPosition = SheetData.instance.initialPosition ?? const SnappingPosition.pixels(positionPixels: 0.0);
-  final List<SnappingPosition> _snappingPositions = [
-    const SnappingPosition.pixels(positionPixels: 0.0),
-    const SnappingPosition.pixels(positionPixels: 0.0),
-  ];
+  double _lastPinPosition = SheetData.instance.initialPosition ?? 0.0;
+  final List<double> _pinPositions = List.filled(2, 0.0);
 
+  // * Getters & Setters
   List<double> get sizes => _childrenSizes;
-
   int get currentPageIndex => _currentPageIndex;
   int get previousPageIndex => _previousPageIndex;
   double get currentSize => _childrenSizes[_currentPageIndex];
@@ -29,49 +27,48 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   double get currentPosition => _currentPosition;
   double get screenHeight => _constraints!.maxHeight;
   double get maxSheetHeight => _maxSheetHeight;
-  double get headerHeight => _headerHeight;
+  // double get headerHeight => _headerHeight;
   bool get hasTitles{
     if(SheetData.instance.titles == null){
       return false;
     }
     return true;
   }
+  double get lastPinPosition => _lastPinPosition;
+  double get bottomPinPosition => _pinPositions[0];
+  double get topPinPosition => _pinPositions[1];
+  // SnappingCalculator get snappingCalculator {
+  //   final calculator = SnappingCalculator(
+  //     allSnappingPositions: _snappingPositions,
+  //     lastSnappingPosition: _lastSnappingPosition,
+  //     maxHeight: screenHeight,
+  //     grabbingHeight: _headerHeight,
+  //     currentPosition: _currentPosition,
+  //   );
+  //   return calculator;
+  // }
+  // SheetPositionData get createPositionData {
+  //   final data = SheetPositionData(_currentPosition, snappingCalculator);
+  //   return data;
+  // }
 
   set currentPosition(double position) {
     if(_currentPosition != position){
       _currentPosition = position;
       notifyListeners();
-      SheetData.instance.onSheetMoved?.call(createPositionData);
+      SheetData.instance.onSheetMoved?.call(_currentPosition);
     }
   }
-  set lastSnappingPosition(SnappingPosition position){
-    if(_lastSnappingPosition != position){
-      _lastSnappingPosition = position;
+  set lastPinPosition(double position){
+    if(_lastPinPosition != position){
+      _lastPinPosition = position;
     }
   }
 
-
-  SnappingPosition get lastSnappingPosition => _lastSnappingPosition;
-  SnappingPosition get maxSnapPosition => _snappingPositions[1];
-  SnappingCalculator get snappingCalculator {
-    final calculator = SnappingCalculator(
-      allSnappingPositions: _snappingPositions,
-      lastSnappingPosition: _lastSnappingPosition,
-      maxHeight: screenHeight,
-      grabbingHeight: _headerHeight,
-      currentPosition: _currentPosition,
-    );
-    return calculator;
-  }
-  SheetPositionData get createPositionData {
-    final data = SheetPositionData(_currentPosition, snappingCalculator);
-    return data;
-  }
 
   // * Initializations
   void initializeChildrenSizes(int length){
     _childrenSizes = List.filled(length, 0.0);
-
   }
   void initializeSheetHeight({required BoxConstraints boxConstraints}){
     if(_constraints != boxConstraints){
@@ -86,7 +83,7 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
     _previousPageIndex = _currentPageIndex - 1 < 0 ? 0 : _currentPageIndex - 1;
   }
 
-
+  // * Member Functions
   void reinitializeSizes({required int length}) {
     final currentPageSize = _childrenSizes[_currentPageIndex];
     initializeChildrenSizes(length);
@@ -111,11 +108,10 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   }
   bool updateMaxSnap(){
     final height = _childrenSizes[_currentPageIndex];
-    final snapPosition = SnappingPosition.pixels(positionPixels: height);
-    final canUpdate = _snappingPositions[1] != snapPosition;
+    final canUpdate = _pinPositions[1] != height;
 
     if(canUpdate){
-      _snappingPositions[1] = snapPosition;
+      _pinPositions[1] = height;
       notifyListeners();
     }
 
@@ -137,38 +133,68 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
     }
     return oldHeight;
   }
-
   double getNewPosition(double dragAmount) {
     var newPosition = _currentPosition - dragAmount;
 
-    var calculator = snappingCalculator;
-    var maxPos = calculator.getBiggestPositionPixels();
-    var minPos = calculator.getSmallestPositionPixels();
-    if (newPosition > maxPos) return maxPos;
-    if (newPosition < minPos) return minPos;
+    if (newPosition > topPinPosition) return topPinPosition;
+    if (newPosition < bottomPinPosition) return bottomPinPosition;
 
     return newPosition;
   }
   void updateCurrentPosition(double dragAmount){
     currentPosition = getNewPosition(dragAmount);
   }
+  bool onTabPressed(index){
+    if(index == _currentPageIndex){
 
+      return true;
+    }
+    return false;
+  }
+
+
+  double get bestPinPosition{
+    _pinPositions.sort();
+    if(_currentPosition >= _pinPositions[1]){
+      return _pinPositions[1];
+    }
+    if(_currentPosition <= _pinPositions[0]){
+      return _pinPositions[0];
+    }
+    var relevantPinPositions = _getRelevantPinPositions();
+    return _getClosestPinPosition(relevantPinPositions);
+  }
+
+  List<double> _getRelevantPinPositions(){
+    final dragDirection = _getDragDirection();
+    final result = _pinPositions.where((position){
+      if(position == _lastPinPosition) return true;
+      if(position == _currentPosition) return true;
+      if(position > _currentPosition && dragDirection == DragDirection.down) return false;
+      if(position < _currentPosition && dragDirection == DragDirection.up) return false;
+      return true;
+    }).toList();
+    return result;
+  }
+  DragDirection _getDragDirection(){
+    if(_currentPosition > _lastPinPosition){
+      return DragDirection.up;
+    } else{
+      return DragDirection.down;
+    }
+  }
+  double _getClosestPinPosition(List<double> relevantPinPositions){
+    double? minDistance;
+    double? closestPinPosition;
+    for(var position in relevantPinPositions){
+      double sensitivityFactor = position == _lastPinPosition ? 5 : 1;
+      final distanceToPin = (position - _currentPosition).abs();
+      double distance = distanceToPin * sensitivityFactor;
+      if(minDistance == null || distance < minDistance){
+        minDistance = distance;
+        closestPinPosition = position;
+      }
+    }
+    return closestPinPosition!;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
