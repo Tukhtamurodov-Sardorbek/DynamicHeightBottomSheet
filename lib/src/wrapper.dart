@@ -36,7 +36,6 @@ class DynamicBottomSheet extends StatelessWidget {
 
     List<String>? titles,
     double? initialPosition,
-    double? headerElevation,
     BorderRadiusGeometry? headerBorderRadius,
     Decoration? headerDecoration,
     Size? grabbingSize,
@@ -57,7 +56,6 @@ class DynamicBottomSheet extends StatelessWidget {
         heightFactor: heightFactor,
         titles: titles,
         initialPosition: initialPosition,
-        headerElevation: headerElevation,
         headerBorderRadius: headerBorderRadius,
         headerDecoration: headerDecoration,
         grabbingSize: grabbingSize,

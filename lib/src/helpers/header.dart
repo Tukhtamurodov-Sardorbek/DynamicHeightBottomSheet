@@ -38,33 +38,35 @@ class SheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = SheetData.instance;
-    return Material(
-      elevation: data.headerElevation ?? 8.0,
-      borderRadius: data.headerBorderRadius ?? const BorderRadius.vertical(top: Radius.circular(30)),
-      child: Container(
-        padding: const EdgeInsets.only(top: 10, bottom: 6),
-        decoration: data.headerDecoration ?? const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: data.grabbingSize?.height ?? 4,
-              width: data.grabbingSize?.width ?? 54,
-              decoration: data.grabbingDecoration ?? BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(30),
-              ),
+    return Container(
+      padding: const EdgeInsets.only(top: 10, bottom: 6),
+      decoration: data.headerDecoration ?? const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        boxShadow: [
+          BoxShadow(
+            spreadRadius: 1,
+            color: Colors.grey,
+          )
+        ]
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: data.grabbingSize?.height ?? 4,
+            width: data.grabbingSize?.width ?? 54,
+            decoration: data.grabbingDecoration ?? BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(height: 10),
-            if(context.read<DynamicBottomSheetProvider>().hasTitles)
-              const Flexible(
-                child: _SheetTabBar(),
-              ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 10),
+          if(context.read<DynamicBottomSheetProvider>().hasTitles)
+            const Flexible(
+              child: _SheetTabBar(),
+            ),
+        ],
       ),
     );
   }

@@ -61,11 +61,14 @@ class _MyAppState extends State<MyApp> {
       body: DynamicBottomSheet(
         heightFactor: 0.5,
         titles: const ['Title #1', 'Title #2', 'Title #3', 'Title #4', 'Title #5', 'Title #6', 'Title #7', 'Title #8',],
-        // initialPosition: 250,
+        // initialPosition: 0,
 
-          // headerElevation: 8,
-          // headerBorderRadius: headerBorderRadius,
-          // headerDecoration: headerDecoration,
+          // headerDecoration: BoxDecoration(
+          //   // color: Colors.red,
+          //   borderRadius:  BorderRadius.vertical(
+          //     top: Radius.circular(20)
+          //   )
+          // ),
           // grabbingConstraints: grabbingConstraints,
           // grabbingDecoration: grabbingDecoration,
           // tabBarPadding: tabBarPadding,

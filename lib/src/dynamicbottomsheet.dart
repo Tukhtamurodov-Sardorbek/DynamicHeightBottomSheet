@@ -100,12 +100,20 @@ class _WrappedDynamicBottomSheetState extends State<WrappedDynamicBottomSheet>
         children: [
           Positioned.fill(
             child: Listener(
-              onPointerDown: (_) {
+              onPointerUp: (_){
                 final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).bottomPinPosition;
                 final lastPosition = Provider.of<DynamicBottomSheetProvider>(context, listen: false).lastPinPosition;
 
                 if(position != lastPosition){
-                  _snapToPosition(position, 'GestureDetector');
+                  _snapToPosition(position, 'UP');
+                }
+              },
+              onPointerMove: (_) {
+                final position = Provider.of<DynamicBottomSheetProvider>(context, listen: false).bottomPinPosition;
+                final lastPosition = Provider.of<DynamicBottomSheetProvider>(context, listen: false).lastPinPosition;
+
+                if(position != lastPosition){
+                  _snapToPosition(position, 'MOVE');
                 }
               },
               child: widget.scaffoldBody,

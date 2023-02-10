@@ -9,7 +9,6 @@ class SheetData {
   final Function(double pixel)? _onSnapCompleted;
   final Function(double pixel)? _onSnapStart;
 
-  final double? _headerElevation;
   final BorderRadiusGeometry? _headerBorderRadius;
   final Decoration? _headerDecoration;
   final Size? _grabbingSize;
@@ -24,7 +23,6 @@ class SheetData {
     required double heightFactor,
     List<String>? titles,
     double? initialPosition,
-    double? headerElevation,
     BorderRadiusGeometry? headerBorderRadius,
     Decoration? headerDecoration,
     Size? grabbingSize,
@@ -42,7 +40,6 @@ class SheetData {
         _initialPosition = initialPosition,
         _onPageChanged = onPageChanged,
         _titles = titles,
-        _headerElevation = headerElevation,
         _headerBorderRadius = headerBorderRadius,
         _headerDecoration = headerDecoration,
         _grabbingSize = grabbingSize,
@@ -59,7 +56,6 @@ class SheetData {
   double get heightFactor => _heightFactor;
   double? get initialPosition => _initialPosition;
   List<String>? get titles => _titles;
-  double? get headerElevation => _headerElevation;
   BorderRadiusGeometry? get headerBorderRadius => _headerBorderRadius;
   Decoration? get headerDecoration => _headerDecoration;
   Size? get grabbingSize => _grabbingSize;
@@ -86,7 +82,6 @@ class SheetData {
 
     List<String>? titles,
     double? initialPosition,
-    double? headerElevation,
     BorderRadiusGeometry? headerBorderRadius,
     Decoration? headerDecoration,
     Size? grabbingSize,
@@ -105,7 +100,6 @@ class SheetData {
         heightFactor: heightFactor,
         titles: titles,
         initialPosition: initialPosition,
-        headerElevation: headerElevation,
         headerBorderRadius: headerBorderRadius,
         headerDecoration: headerDecoration,
         grabbingSize: grabbingSize,

@@ -144,13 +144,6 @@ class DynamicBottomSheetProvider extends ChangeNotifier{
   void updateCurrentPosition(double dragAmount){
     currentPosition = getNewPosition(dragAmount);
   }
-  bool onTabPressed(index){
-    if(index == _currentPageIndex){
-
-      return true;
-    }
-    return false;
-  }
 
 
   double get bestPinPosition{
